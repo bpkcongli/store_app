@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './user_registration_screen.dart';
 import '../product_list_screen.dart';
 import '../../controllers/login_controller.dart';
+import '../../exceptions/app_exception.dart';
 
 class UserAuthScreen extends StatefulWidget {
   const UserAuthScreen({super.key});
@@ -33,19 +34,26 @@ class _UserAuthScreenState extends State<UserAuthScreen> {
   void onPressedLoginButtonHandler() {
     final username = _usernameController.text;
     final password = _passwordController.text;
-    final isLoginSucceed = _loginController.login(username, password);
+    final bool isMounted = context.mounted;
 
-    if (isLoginSucceed) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) {
-          return ProductListScreen(username: username);
-        }),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Kredensial yang Anda masukkan salah."),
-      ));
-    }
+    _loginController.authenticate(username, password)
+      .then((isLoginSucceed) {
+        if (isLoginSucceed) {
+          if (isMounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) {
+                return ProductListScreen(username: username);
+              }),
+            );
+          }
+        }
+      }).onError((AppException e, _) {
+        if (isMounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message),
+          ));
+        }
+      });
   }
 
   void onPressedRegisterButtonHandler() {

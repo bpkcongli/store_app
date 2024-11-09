@@ -21,11 +21,18 @@ class ProductListScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              if (loginController.logout(username)) {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                  return const UserAuthScreen();
-                }));
-              }
+              final bool isMounted = context.mounted;
+
+              loginController.logout()
+                .then((isLogoutSucceed) {
+                  if (isMounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) {
+                        return const UserAuthScreen();
+                      }),
+                    );
+                  }
+                });
             },
             icon: const Icon(Icons.logout),
           ),

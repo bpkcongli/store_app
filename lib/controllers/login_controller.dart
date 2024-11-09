@@ -1,9 +1,8 @@
-import '../models/user.dart';
+import '../common/user_info.dart';
 import '../repositories/user_repository.dart';
 
 class LoginController {
   final UserRepository _repository = UserRepository();
-  final User _registeredUser = User(username: 'andrian', email: 'andrian8367@gmail.com', password: '0004');
 
   Future<bool> registration(String username, String email, String password) async {
     await _repository.registration({
@@ -15,11 +14,18 @@ class LoginController {
     return true;
   }
 
-  bool login(String username, String password) {
-    return _registeredUser.checkCredential(username, password);
+  Future<bool> authenticate(String username, String password) async {
+    final accessToken = await _repository.authenticate({
+      'username': username,
+      'password': password,
+    });
+
+    await UserInfo().setToken(accessToken);
+
+    return true;
   }
 
-  bool logout(String username) {
-    return true;
+  Future<bool> logout() async {
+    return UserInfo().logout();
   }
 }
