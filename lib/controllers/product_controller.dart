@@ -4,32 +4,41 @@ import '../repositories/product_repository.dart';
 
 class ProductController {
   final ProductRepository _repository = ProductRepository();
-  List<Product> _products = [
+  final List<Product> _products = [
     Product.build('Produk A', 'Ini deskripsi produk A', 100000),
     Product.build('Produk B', 'Ini deskripsi produk B', 100000),
     Product.build('Produk C', 'Ini deskripsi produk C', 100000),
     Product.build('Produk D', 'Ini deskripsi produk D', 100000),
   ];
 
-  void addNewProduct(String name, String description, double price) {
-    _checkNewProductValidity(name, description, price);
+  Future<bool> createProduct(String code, String name, double price) async {
+    _checkNewProductValidity(code, name, price);
 
-    _products.add(Product.build(name, description, price));
+    await _repository.createProduct({
+      'code': code,
+      'name': name,
+      'price': price,
+    });
+
+    return true;
   }
 
   Future<List<Product>> getAllProducts() async {
     return _repository.getAllProducts();
   }
 
-  Product getSpecificProduct(String id) {
-    return _products.first;
-    // return products.firstWhere((product) => product.id == id);
+  Future<Product> getSpecificProduct(String productId) {
+    return _repository.getSpecificProduct(productId);
   }
 
-  bool editProduct(String id, String name, String description, double price) {
-    _products = _products.map((product) {
-      return product.id == id ? product.edit(name, description, price) : product;
-    }).toList();
+  Future<bool> editProduct(String productId, String code, String name, double price) async {
+    _checkNewProductValidity(code, name, price);
+
+    await _repository.updateSpecificProduct(productId, {
+      'code': code,
+      'name': name,
+      'price': price,
+    });
 
     return true;
   }
@@ -40,12 +49,12 @@ class ProductController {
     return true;
   }
 
-  void _checkNewProductValidity(String name, String description, double price) {
-    if (name.isEmpty) {
-      throw ProductInvalidStateException('Product name is empty.');
+  void _checkNewProductValidity(String code, String name, double price) {
+    if (code.isEmpty) {
+      throw ProductInvalidStateException('Product code is empty.');
     }
 
-    if (description.isEmpty) {
+    if (name.isEmpty) {
       throw ProductInvalidStateException('Product description is empty.');
     }
 

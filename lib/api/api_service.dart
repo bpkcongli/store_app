@@ -5,7 +5,7 @@ import './api_constants.dart';
 import '../exceptions/app_exception.dart';
 
 class ApiService {
-  Future<dynamic> get(String endpoint, [Map<String, String> headers = const {}]) async {
+  Future<dynamic> get(String endpoint, [Map<String, dynamic> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
@@ -16,7 +16,7 @@ class ApiService {
     }
   }
 
-  Future<dynamic> post(String endpoint, Map<String, String> payload, [Map<String, String> headers = const {}]) async {
+  Future<dynamic> post(String endpoint, Map<String, dynamic> payload, [Map<String, dynamic> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
@@ -27,7 +27,7 @@ class ApiService {
     }
   }
 
-  Future<dynamic> put(String endpoint, Map<String, String> payload, [Map<String, String> headers = const {}]) async {
+  Future<dynamic> put(String endpoint, Map<String, dynamic> payload, [Map<String, dynamic> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
@@ -38,7 +38,7 @@ class ApiService {
     }
   }
 
-  Future<dynamic> delete(String endpoint, [Map<String, String> headers = const {}]) async {
+  Future<dynamic> delete(String endpoint, [Map<String, dynamic> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
