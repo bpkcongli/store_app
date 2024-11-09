@@ -1,7 +1,9 @@
 import '../exceptions/product_invalid_state_exception.dart';
 import '../models/product.dart';
+import '../repositories/product_repository.dart';
 
 class ProductController {
+  final ProductRepository _repository = ProductRepository();
   List<Product> _products = [
     Product.build('Produk A', 'Ini deskripsi produk A', 100000),
     Product.build('Produk B', 'Ini deskripsi produk B', 100000),
@@ -15,8 +17,8 @@ class ProductController {
     _products.add(Product.build(name, description, price));
   }
 
-  List<Product> getAllProducts() {
-    return _products;
+  Future<List<Product>> getAllProducts() async {
+    return _repository.getAllProducts();
   }
 
   Product getSpecificProduct(String id) {

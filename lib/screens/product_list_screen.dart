@@ -65,44 +65,65 @@ class ProductListScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView.builder(
-                itemCount: controller.getAllProducts().length,
-                itemBuilder: (context, index) {
-                  final product = controller.getAllProducts()[index];
+              child: FutureBuilder(
+                future: controller.getAllProducts(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('Gagal mendapatkan daftar produk.'),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text('Belum ada produk yang ditambahkan.'),
+                    );
+                  } else {
+                    final products = snapshot.data!;
 
-                  return ListTile(
-                    title: Text(product.name),
-                    subtitle: Text('$currency ${product.price.truncate().toString()}'),
-                    trailing: PopupMenuButton<String>(
-                      itemBuilder: (context) {
-                        return {'Edit', 'Delete'}.map((option) {
-                          return PopupMenuItem<String>(
-                            value: option,
-                            child: Text(option),
-                          );
-                        }).toList();
-                      },
-                      onSelected: (String option) {
-                        switch (option) {
-                          case 'Edit': {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                              return ProductFormScreen(productController: controller, productId: product.id);
-                            }));
-                          }
-                          case 'Delete': {
-                            final deleteProductResult = controller.deleteProduct(product.id);
+                    return ListView.builder(
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
 
-                            if (deleteProductResult) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                content: Text("Produk berhasil dihapus."),
-                              ));
-                            }
-                          }
-                        }
+                        return ListTile(
+                          title: Text(product.name),
+                          subtitle: Text('$currency ${product.price.truncate().toString()}'),
+                          trailing: PopupMenuButton<String>(
+                            itemBuilder: (context) {
+                              return {'Edit', 'Delete'}.map((option) {
+                                return PopupMenuItem<String>(
+                                  value: option,
+                                  child: Text(option),
+                                );
+                              }).toList();
+                            },
+                            onSelected: (String option) {
+                              switch (option) {
+                                case 'Edit': {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                    return ProductFormScreen(productController: controller, productId: product.id);
+                                  }));
+                                }
+                                case 'Delete': {
+                                  final deleteProductResult = controller.deleteProduct(product.id);
+
+                                  if (deleteProductResult) {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                      content: Text("Produk berhasil dihapus."),
+                                    ));
+                                  }
+                                }
+                              }
+                            },
+                          ),
+                          onTap: () {},
+                        );
                       },
-                    ),
-                    onTap: () {},
-                  );
+                    );
+                  }
                 },
               ),
             ),

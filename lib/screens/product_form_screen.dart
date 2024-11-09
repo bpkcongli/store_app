@@ -30,7 +30,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       final product = widget.productController.getSpecificProduct(widget.productId as String);
 
       _nameController = TextEditingController(text: product.name);
-      _descriptionController = TextEditingController(text: product.description);
+      _descriptionController = TextEditingController(text: product.code);
       _priceController = TextEditingController(text: product.price.round().toString());
     }
   }

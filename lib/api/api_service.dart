@@ -5,44 +5,44 @@ import './api_constants.dart';
 import '../exceptions/app_exception.dart';
 
 class ApiService {
-  Future<dynamic> get(String endpoint) async {
+  Future<dynamic> get(String endpoint, [Map<String, String> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
-      final response = await http.get(url, headers: ApiConstants.headers);
+      final response = await http.get(url, headers: {...ApiConstants.headers, ...headers});
       return _checkIsResponseSucceed(response);
     } on SocketException {
       throw ConnectionFailedException();
     }
   }
 
-  Future<dynamic> post(String endpoint, Map<String, String> payload) async {
+  Future<dynamic> post(String endpoint, Map<String, String> payload, [Map<String, String> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
-      final response = await http.post(url, headers: ApiConstants.headers, body: json.encode(payload));
+      final response = await http.post(url, headers: {...ApiConstants.headers, ...headers}, body: json.encode(payload));
       return _checkIsResponseSucceed(response);
     } on SocketException {
       throw ConnectionFailedException();
     }
   }
 
-  Future<dynamic> put(String endpoint, Map<String, String> payload) async {
+  Future<dynamic> put(String endpoint, Map<String, String> payload, [Map<String, String> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
-      final response = await http.put(url, headers: ApiConstants.headers, body: json.encode(payload));
+      final response = await http.put(url, headers: {...ApiConstants.headers, ...headers}, body: json.encode(payload));
       return _checkIsResponseSucceed(response);
     } on SocketException {
       throw ConnectionFailedException();
     }
   }
 
-  Future<dynamic> delete(String endpoint) async {
+  Future<dynamic> delete(String endpoint, [Map<String, String> headers = const {}]) async {
     final url = Uri.parse(ApiConstants.baseUrl + endpoint);
 
     try {
-      final response = await http.delete(url, headers: ApiConstants.headers);
+      final response = await http.delete(url, headers: {...ApiConstants.headers, ...headers});
       return _checkIsResponseSucceed(response);
     } on SocketException {
       throw ConnectionFailedException();
