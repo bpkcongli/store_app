@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import '../controllers/login_controller.dart';
-import '../exceptions/app_exception.dart';
-import '../screens/login_screen.dart';
+import './user_registration_screen.dart';
+import '../product_list_screen.dart';
+import '../../controllers/login_controller.dart';
 
-class UserRegistrationScreen extends StatefulWidget {
-  const UserRegistrationScreen({super.key});
+class UserAuthScreen extends StatefulWidget {
+  const UserAuthScreen({super.key});
 
   @override
-  State<UserRegistrationScreen> createState() => _UserRegistrationScreenState();
+  State<UserAuthScreen> createState() => _UserAuthScreenState();
 }
 
-class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
+class _UserAuthScreenState extends State<UserAuthScreen> {
   late LoginController _loginController;
   late TextEditingController _usernameController;
-  late TextEditingController _emailController;
   late TextEditingController _passwordController;
 
   @override
@@ -21,7 +20,6 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     super.initState();
     _loginController = LoginController();
     _usernameController = TextEditingController();
-    _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
@@ -29,44 +27,31 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   void dispose() {
     super.dispose();
     _usernameController.dispose();
-    _emailController.dispose();
     _passwordController.dispose();
   }
 
-  void onPressedRegisterButtonHandler() {
+  void onPressedLoginButtonHandler() {
     final username = _usernameController.text;
-    final email = _emailController.text;
     final password = _passwordController.text;
-    final bool isMounted = context.mounted;
+    final isLoginSucceed = _loginController.login(username, password);
 
-    _loginController.registration(username, email, password)
-      .then((isRegistrationSucceed) {
-        if (isRegistrationSucceed) {
-          if (isMounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Registrasi user berhasil.'),
-            ));
-
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) {
-                return const LoginScreen();
-              }),
-            );
-          }
-        }
-      }).onError((AppException e, _) {
-        if (isMounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(e.message),
-          ));
-        }
-      });
+    if (isLoginSucceed) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) {
+          return ProductListScreen(username: username);
+        }),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Kredensial yang Anda masukkan salah."),
+      ));
+    }
   }
 
-  void onPressedLoginButtonHandler() {
+  void onPressedRegisterButtonHandler() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) {
-        return const LoginScreen();
+        return const UserRegistrationScreen();
       }),
     );
   }
@@ -81,7 +66,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Register',
+                'Login',
                 style: Theme.of(context).textTheme.displayLarge,
               ),
               const SizedBox(height: 24),
@@ -89,12 +74,6 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                 controller: _usernameController,
                 decoration: const InputDecoration(
                   hintText: 'Masukkan username',
-                ),
-              ),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan email',
                 ),
               ),
               TextField(
@@ -108,22 +87,22 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: onPressedRegisterButtonHandler,
+                  onPressed: onPressedLoginButtonHandler,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
                   ),
-                  child: const Text('REGISTER'),
+                  child: const Text('LOGIN'),
                 ),
               ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: onPressedLoginButtonHandler,
+                  onPressed: onPressedRegisterButtonHandler,
                   style: ElevatedButton.styleFrom(
                     side: const BorderSide(color: Colors.amber, width: 2),
                     backgroundColor: Colors.amber[50],
                   ),
-                  child: const Text('LOGIN'),
+                  child: const Text('REGISTER'),
                 ),
               ),
             ],

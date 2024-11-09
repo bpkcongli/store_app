@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import './user/user_auth_screen.dart';
 import '../controllers/login_controller.dart';
 import '../controllers/product_controller.dart';
-import '../screens/login_screen.dart';
 import '../screens/product_form_screen.dart';
 
 class ProductListScreen extends StatelessWidget {
@@ -23,7 +23,7 @@ class ProductListScreen extends StatelessWidget {
             onPressed: () {
               if (loginController.logout(username)) {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-                  return const LoginScreen();
+                  return const UserAuthScreen();
                 }));
               }
             },
