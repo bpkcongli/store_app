@@ -4,12 +4,6 @@ import '../repositories/product_repository.dart';
 
 class ProductController {
   final ProductRepository _repository = ProductRepository();
-  final List<Product> _products = [
-    Product.build('Produk A', 'Ini deskripsi produk A', 100000),
-    Product.build('Produk B', 'Ini deskripsi produk B', 100000),
-    Product.build('Produk C', 'Ini deskripsi produk C', 100000),
-    Product.build('Produk D', 'Ini deskripsi produk D', 100000),
-  ];
 
   Future<bool> createProduct(String code, String name, double price) async {
     _checkNewProductValidity(code, name, price);
@@ -43,8 +37,8 @@ class ProductController {
     return true;
   }
 
-  bool deleteProduct(String id) {
-    _products.removeWhere((product) => product.id == id);
+  Future<bool> deleteProduct(String productId) async {
+    await _repository.deleteSpecificProduct(productId);
 
     return true;
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './user/user_auth_screen.dart';
 import '../controllers/login_controller.dart';
 import '../controllers/product_controller.dart';
+import '../exceptions/app_exception.dart';
 import '../screens/product_form_screen.dart';
 
 class ProductListScreen extends StatelessWidget {
@@ -108,13 +109,22 @@ class ProductListScreen extends StatelessWidget {
                                   }));
                                 }
                                 case 'Delete': {
-                                  final deleteProductResult = controller.deleteProduct(product.id);
+                                  final isMounted = context.mounted;
 
-                                  if (deleteProductResult) {
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                      content: Text("Produk berhasil dihapus."),
-                                    ));
-                                  }
+                                  controller.deleteProduct(product.id)
+                                    .then((isDeleteProductSucceed) {
+                                      if (isDeleteProductSucceed) {
+                                        if (isMounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                            content: Text('Produk berhasil dihapus.'),
+                                          ));
+                                        }
+                                      }
+                                    }).onError((AppException e, _) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                        content: Text(e.message),
+                                      ));
+                                    });
                                 }
                               }
                             },

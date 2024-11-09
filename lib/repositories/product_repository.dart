@@ -35,6 +35,13 @@ class ProductRepository {
     return response['data'];
   }
 
+  Future<Null> deleteSpecificProduct(String productId) async {
+    final authorizationHeader = await _getAuthorizationHeader();
+    final response = await _apiService.delete('/products/$productId', { ...authorizationHeader });
+
+    return response['data'];
+  }
+
   Future<Map<String, String>> _getAuthorizationHeader() async {
     final token = await UserInfo().getToken();
 
