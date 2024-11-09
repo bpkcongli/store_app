@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './user_registration_screen.dart';
-import '../product_list_screen.dart';
+import '../product/product_list_screen.dart';
 import '../../controllers/login_controller.dart';
 import '../../exceptions/app_exception.dart';
 

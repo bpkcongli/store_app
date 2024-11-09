@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import './user/user_auth_screen.dart';
-import '../controllers/login_controller.dart';
-import '../controllers/product_controller.dart';
-import '../exceptions/app_exception.dart';
-import '../models/product.dart';
-import '../screens/product_form_screen.dart';
+import './product_form_screen.dart';
+import '../user/user_auth_screen.dart';
+import '../../controllers/login_controller.dart';
+import '../../controllers/product_controller.dart';
+import '../../exceptions/app_exception.dart';
+import '../../models/product.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String username;

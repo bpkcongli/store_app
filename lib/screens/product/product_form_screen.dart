@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../controllers/product_controller.dart';
-import '../exceptions/app_exception.dart';
-import '../exceptions/product_invalid_state_exception.dart';
+import '../../controllers/product_controller.dart';
+import '../../exceptions/app_exception.dart';
+import '../../exceptions/product_invalid_state_exception.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final String? productId;
