@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/login_controller.dart';
 import '../controllers/product_controller.dart';
 import '../screens/login_screen.dart';
+import '../screens/product_form_screen.dart';
 
 class ProductListScreen extends StatelessWidget {
   final String username;
@@ -47,7 +48,9 @@ class ProductListScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
-                    // TODO: Redirect to product form screen
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                      return ProductFormScreen(productController: controller);
+                    }));
                   },
                   child: const Text('Tambah Produk'),
                 ),
@@ -75,7 +78,9 @@ class ProductListScreen extends StatelessWidget {
                       onSelected: (String option) {
                         switch (option) {
                           case 'Edit': {
-                            // TODO: Redirect to product form screen
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                              return ProductFormScreen(productController: controller, productId: product.id);
+                            }));
                           }
                           case 'Delete': {
                             final deleteProductResult = controller.deleteProduct(product.id);

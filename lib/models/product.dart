@@ -13,4 +13,12 @@ class Product {
     
     return Product._(uuid.v4(), name, description, price);
   }
+
+  Product edit(String name, String description, double price) {
+    name = name;
+    description = description;
+    price = price;
+
+    return this;
+  }
 }
