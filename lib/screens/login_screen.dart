@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controllers/login_controller.dart';
+import '../screens/product_list_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({ super.key });
@@ -34,7 +35,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final isLoginSucceed = _loginController.login(username, password);
 
     if (isLoginSucceed) {
-      // TODO: Redirect to product list screen
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
+        return ProductListScreen(username: username);
+      }));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Kredensial yang Anda masukkan salah."),
