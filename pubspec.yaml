@@ -36,6 +36,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   uuid: ^4.4.2
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -87,5 +88,11 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+  fonts:
+    - family: Corben
+      fonts:
+        - asset: assets/fonts/Corben-Bold.ttf
+          weight: 700
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

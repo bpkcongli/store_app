@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import '../controllers/login_controller.dart';
-import '../screens/product_list_screen.dart';
-import '../screens/user_registration_screen.dart';
+import '../exceptions/app_exception.dart';
+import '../screens/login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class UserRegistrationScreen extends StatefulWidget {
+  const UserRegistrationScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<UserRegistrationScreen> createState() => _UserRegistrationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   late LoginController _loginController;
   late TextEditingController _usernameController;
+  late TextEditingController _emailController;
   late TextEditingController _passwordController;
 
   @override
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _loginController = LoginController();
     _usernameController = TextEditingController();
+    _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
@@ -27,31 +29,44 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     super.dispose();
     _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
   }
 
-  void onPressedLoginButtonHandler() {
+  void onPressedRegisterButtonHandler() {
     final username = _usernameController.text;
+    final email = _emailController.text;
     final password = _passwordController.text;
-    final isLoginSucceed = _loginController.login(username, password);
+    final bool isMounted = context.mounted;
 
-    if (isLoginSucceed) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) {
-          return ProductListScreen(username: username);
-        }),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Kredensial yang Anda masukkan salah."),
-      ));
-    }
+    _loginController.registration(username, email, password)
+      .then((isRegistrationSucceed) {
+        if (isRegistrationSucceed) {
+          if (isMounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Registrasi user berhasil.'),
+            ));
+
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) {
+                return const LoginScreen();
+              }),
+            );
+          }
+        }
+      }).onError((AppException e, _) {
+        if (isMounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message),
+          ));
+        }
+      });
   }
 
-  void onPressedRegisterButtonHandler() {
+  void onPressedLoginButtonHandler() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) {
-        return const UserRegistrationScreen();
+        return const LoginScreen();
       }),
     );
   }
@@ -66,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Login',
+                'Register',
                 style: Theme.of(context).textTheme.displayLarge,
               ),
               const SizedBox(height: 24),
@@ -74,6 +89,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _usernameController,
                 decoration: const InputDecoration(
                   hintText: 'Masukkan username',
+                ),
+              ),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  hintText: 'Masukkan email',
                 ),
               ),
               TextField(
@@ -87,22 +108,22 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: onPressedLoginButtonHandler,
+                  onPressed: onPressedRegisterButtonHandler,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
                   ),
-                  child: const Text('LOGIN'),
+                  child: const Text('REGISTER'),
                 ),
               ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: onPressedRegisterButtonHandler,
+                  onPressed: onPressedLoginButtonHandler,
                   style: ElevatedButton.styleFrom(
                     side: const BorderSide(color: Colors.amber, width: 2),
                     backgroundColor: Colors.amber[50],
                   ),
-                  child: const Text('REGISTER'),
+                  child: const Text('LOGIN'),
                 ),
               ),
             ],
