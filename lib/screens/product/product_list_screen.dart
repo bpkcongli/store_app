@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './product_form_screen.dart';
 import '../user/user_auth_screen.dart';
-import '../../controllers/login_controller.dart';
 import '../../viewmodels/product_view_model.dart';
+import '../../viewmodels/user_view_model.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String username;
@@ -15,8 +15,6 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  final LoginController loginController = LoginController();
-
   @override
   void initState() {
     super.initState();
@@ -43,7 +41,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   Future<void> onLogoutHandler(VoidCallback callback) async {
-    final logoutResult = await loginController.logout();
+    final viewModel = context.read<UserViewModel>();
+    final logoutResult = await viewModel.logout();
     
     if (logoutResult) {
       callback();

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './user_registration_screen.dart';
 import '../product/product_list_screen.dart';
-import '../../controllers/login_controller.dart';
-import '../../exceptions/app_exception.dart';
+import '../../viewmodels/user_view_model.dart';
 
 class UserAuthScreen extends StatefulWidget {
   const UserAuthScreen({super.key});
@@ -12,16 +12,27 @@ class UserAuthScreen extends StatefulWidget {
 }
 
 class _UserAuthScreenState extends State<UserAuthScreen> {
-  late LoginController _loginController;
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
 
   @override
   void initState() {
     super.initState();
-    _loginController = LoginController();
     _usernameController = TextEditingController();
     _passwordController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final viewModel = context.watch<UserViewModel>();
+    if (viewModel.apiErrorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showSnackBar(context, viewModel.apiErrorMessage!);
+        viewModel.clearError();
+      });
+    }
   }
 
   @override
@@ -31,29 +42,15 @@ class _UserAuthScreenState extends State<UserAuthScreen> {
     _passwordController.dispose();
   }
 
-  void onPressedLoginButtonHandler() {
+  Future<void> onPressedLoginButtonHandler(VoidCallback callback) async {
+    final viewModel = context.read<UserViewModel>();
     final username = _usernameController.text;
     final password = _passwordController.text;
-    final bool isMounted = context.mounted;
+    final authenticateResult = await viewModel.authenticate(username, password);
 
-    _loginController.authenticate(username, password)
-      .then((isLoginSucceed) {
-        if (isLoginSucceed) {
-          if (isMounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) {
-                return ProductListScreen(username: username);
-              }),
-            );
-          }
-        }
-      }).onError((AppException e, _) {
-        if (isMounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(e.message),
-          ));
-        }
-      });
+    if (authenticateResult) {
+      callback();
+    }
   }
 
   void onPressedRegisterButtonHandler() {
@@ -95,7 +92,15 @@ class _UserAuthScreenState extends State<UserAuthScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: onPressedLoginButtonHandler,
+                  onPressed: () {
+                    onPressedLoginButtonHandler(() {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) {
+                          return ProductListScreen(username: _usernameController.text);
+                        }),
+                      );
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
                   ),
@@ -118,5 +123,11 @@ class _UserAuthScreenState extends State<UserAuthScreen> {
         ),
       ),
     );
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+    ));
   }
 }
