@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import './product_form_screen.dart';
 import '../user/user_auth_screen.dart';
 import '../../controllers/login_controller.dart';
 import '../../controllers/product_controller.dart';
 import '../../exceptions/app_exception.dart';
-import '../../models/product.dart';
+import '../../viewmodels/product_view_model.dart';
 
 class ProductListScreen extends StatefulWidget {
   final String username;
@@ -19,28 +20,37 @@ class _ProductListScreenState extends State<ProductListScreen> {
   final ProductController controller = ProductController();
   final LoginController loginController = LoginController();
   final String currency = 'Rp';
-  late Future<List<Product>> _products;
 
   @override
   void initState() {
     super.initState();
-    _loadProducts();
-  }
 
-  void _loadProducts() {
-    _products = controller.getAllProducts();
-  }
-
-  Future<void> _refreshProduct() async {
-    setState(() {
-      _loadProducts();
+    Future.microtask(() {
+      final viewModel = context.read<ProductViewModel>();
+      viewModel.getAllProducts();
     });
+  }
 
-    await _products;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final viewModel = context.watch<ProductViewModel>();
+    if (viewModel.apiErrorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(viewModel.apiErrorMessage!)),
+        );
+
+        viewModel.clearError();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<ProductViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
@@ -66,7 +76,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshProduct,
+        onRefresh: viewModel.getAllProducts,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -94,74 +104,53 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
               const SizedBox(height: 8),
               Expanded(
-                child: FutureBuilder(
-                  future: _products,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError) {
-                      return const Center(
-                        child: Text('Gagal mendapatkan daftar produk.'),
-                      );
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(
-                        child: Text('Belum ada produk yang ditambahkan.'),
-                      );
-                    } else {
-                      final products = snapshot.data!;
-        
-                      return ListView.builder(
-                        itemCount: products.length,
-                        itemBuilder: (context, index) {
-                          final product = products[index];
-        
-                          return ListTile(
-                            title: Text(product.name),
-                            subtitle: Text('$currency ${product.price.truncate().toString()}'),
-                            trailing: PopupMenuButton<String>(
-                              itemBuilder: (context) {
-                                return {'Edit', 'Delete'}.map((option) {
-                                  return PopupMenuItem<String>(
-                                    value: option,
-                                    child: Text(option),
-                                  );
-                                }).toList();
-                              },
-                              onSelected: (String option) {
-                                switch (option) {
-                                  case 'Edit': {
-                                    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                                      return ProductFormScreen(productController: controller, productId: product.id);
-                                    }));
-                                  }
-                                  case 'Delete': {
-                                    final isMounted = context.mounted;
-        
-                                    controller.deleteProduct(product.id)
-                                      .then((isDeleteProductSucceed) {
-                                        if (isDeleteProductSucceed) {
-                                          if (isMounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                              content: Text('Produk berhasil dihapus.'),
-                                            ));
-                                          }
-                                        }
-                                      }).onError((AppException e, _) {
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                          content: Text(e.message),
-                                        ));
-                                      });
-                                  }
-                                }
-                              },
-                            ),
-                            onTap: () {},
-                          );
+                child: ListView.builder(
+                  itemCount: viewModel.products.length,
+                  itemBuilder: (context, index) {
+                    final product = viewModel.products[index];
+  
+                    return ListTile(
+                      title: Text(product.name),
+                      subtitle: Text('$currency ${product.price.truncate().toString()}'),
+                      trailing: PopupMenuButton<String>(
+                        itemBuilder: (context) {
+                          return {'Edit', 'Delete'}.map((option) {
+                            return PopupMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            );
+                          }).toList();
                         },
-                      );
-                    }
+                        onSelected: (String option) {
+                          switch (option) {
+                            case 'Edit': {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                return ProductFormScreen(productController: controller, productId: product.id);
+                              }));
+                            }
+                            case 'Delete': {
+                              final isMounted = context.mounted;
+  
+                              controller.deleteProduct(product.id)
+                                .then((isDeleteProductSucceed) {
+                                  if (isDeleteProductSucceed) {
+                                    if (isMounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                        content: Text('Produk berhasil dihapus.'),
+                                      ));
+                                    }
+                                  }
+                                }).onError((AppException e, _) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text(e.message),
+                                  ));
+                                });
+                            }
+                          }
+                        },
+                      ),
+                      onTap: () {},
+                    );
                   },
                 ),
               ),
