@@ -23,7 +23,7 @@ class ProductViewModel extends ChangeNotifier {
 
     try {
       _products = await _repository.getAllProducts();
-      notifyListeners();
+      _setIsLoading(false);
     } on AppException catch (e) {
       _setApiErrorMessage(e.message);
     }

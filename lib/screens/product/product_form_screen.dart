@@ -78,18 +78,20 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       if (widget.productId == null) {
         final createProductResult = await viewModel.createProduct(code, name, price);
 
-        if (createProductResult) {
+        if (createProductResult && mounted) {
           Navigator.pop(context, true);
         }
       } else {
         final editProductResult = await viewModel.editProduct(widget.productId as String, code, name, price);
 
-        if (editProductResult) {
+        if (editProductResult && mounted) {
           Navigator.pop(context, true);
         }
       }
     } on ProductInvalidStateException catch (_) {
-      _showSnackBar(context, 'Data yang Anda masukkan tidak valid.');
+      if (mounted) {
+        _showSnackBar(context, 'Data yang Anda masukkan tidak valid.');
+      }
     }
   }
 
