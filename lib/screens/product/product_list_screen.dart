@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import './product_form_screen.dart';
 import '../user/user_auth_screen.dart';
 import '../../controllers/login_controller.dart';
-import '../../controllers/product_controller.dart';
-import '../../exceptions/app_exception.dart';
 import '../../viewmodels/product_view_model.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -17,7 +15,6 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  final ProductController controller = ProductController();
   final LoginController loginController = LoginController();
   final String currency = 'Rp';
 
@@ -38,10 +35,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     final viewModel = context.watch<ProductViewModel>();
     if (viewModel.apiErrorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(viewModel.apiErrorMessage!)),
-        );
-
+        _showSnackBar(context, viewModel.apiErrorMessage!);
         viewModel.clearError();
       });
     }
@@ -93,10 +87,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                        return ProductFormScreen(productController: controller);
+                    onPressed: () async {
+                      final result = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) {
+                        return const ProductFormScreen();
                       }));
+
+                      if (result == true) {
+                        _showSnackBar(context, 'Produk berhasil ditambahkan.');
+                        viewModel.getAllProducts();
+                      }
                     },
                     child: const Text('Tambah Produk'),
                   ),
@@ -121,30 +120,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             );
                           }).toList();
                         },
-                        onSelected: (String option) {
+                        onSelected: (String option) async {
                           switch (option) {
                             case 'Edit': {
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                                return ProductFormScreen(productController: controller, productId: product.id);
+                              final result = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) {
+                                return ProductFormScreen(productId: product.id);
                               }));
+
+                              if (result == true) {
+                                _showSnackBar(context, 'Produk berhasil diedit.');
+                                viewModel.getAllProducts();
+                              }
                             }
                             case 'Delete': {
-                              final isMounted = context.mounted;
-  
-                              controller.deleteProduct(product.id)
-                                .then((isDeleteProductSucceed) {
-                                  if (isDeleteProductSucceed) {
-                                    if (isMounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                        content: Text('Produk berhasil dihapus.'),
-                                      ));
-                                    }
-                                  }
-                                }).onError((AppException e, _) {
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text(e.message),
-                                  ));
-                                });
+                              final deleteProductResult = await viewModel.deleteProduct(product.id);
+
+                              if (deleteProductResult) {
+                                _showSnackBar(context, 'Produk berhasil dihapus.');
+                                viewModel.getAllProducts();
+                              }
                             }
                           }
                         },
@@ -159,5 +153,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
         ),
       ),
     );
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+    ));
   }
 }

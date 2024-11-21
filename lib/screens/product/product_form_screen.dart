@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../controllers/product_controller.dart';
-import '../../exceptions/app_exception.dart';
+import 'package:provider/provider.dart';
 import '../../exceptions/product_invalid_state_exception.dart';
+import '../../viewmodels/product_view_model.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final String? productId;
-  final ProductController productController;
 
-  const ProductFormScreen({ super.key, required this.productController, this.productId });
+  const ProductFormScreen({ super.key, this.productId });
 
   @override
   State<ProductFormScreen> createState() => _ProductFormScreenState();
@@ -29,6 +28,19 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final viewModel = context.watch<ProductViewModel>();
+    if (viewModel.apiErrorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showSnackBar(context, viewModel.apiErrorMessage!);
+        viewModel.clearError();
+      });
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
 
@@ -38,54 +50,43 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   Future<void> _initializeController() async {
+    final viewModel = context.read<ProductViewModel>();
+
     try {
       if (widget.productId != null) {
-        final product = await widget.productController.getSpecificProduct(widget.productId as String);
+        final product = await viewModel.getSpecificProduct(widget.productId!);
 
-        _codeController.text = product.code;
-        _nameController.text = product.name;
-        _priceController.text = product.price.round().toString();
+        if (product != null) {
+          _codeController.text = product.code;
+          _nameController.text = product.name;
+          _priceController.text = product.price.round().toString();
+        }
       }
     } catch (e) {
       // Log error
     }
   }
 
-  void onPressedSubmitButtonHandler() {
+  Future<void> onPressedSubmitButtonHandler() async {
+    final viewModel = context.read<ProductViewModel>();
+
     try {
       final code = _codeController.text;
       final name = _nameController.text;
       final price = double.parse(_priceController.text);
-      final bool isMounted = context.mounted;
 
       if (widget.productId == null) {
-        widget.productController.createProduct(code, name, price)
-          .then((isCreateProductSucceed) {
-            if (isCreateProductSucceed) {
-              if (isMounted) {
-                _showSnackBar(context, 'Produk berhasil ditambahkan.');
-                Navigator.pop(context);
-              }
-            }
-          }).onError((AppException e, _) {
-            if (isMounted) {
-              _showSnackBar(context, e.message);
-            }
-          });
+        final createProductResult = await viewModel.createProduct(code, name, price);
+
+        if (createProductResult) {
+          Navigator.pop(context, true);
+        }
       } else {
-        widget.productController.editProduct(widget.productId as String, code, name, price)
-          .then((isUpdateProductSucceed) {
-            if (isUpdateProductSucceed) {
-              if (isMounted) {
-                _showSnackBar(context, 'Produk berhasil diedit.');
-                Navigator.pop(context);
-              }
-            }
-          }).onError((AppException e, _) {
-            if (isMounted) {
-              _showSnackBar(context, e.message);
-            }
-          });
+        final editProductResult = await viewModel.editProduct(widget.productId as String, code, name, price);
+
+        if (editProductResult) {
+          Navigator.pop(context, true);
+        }
       }
     } on ProductInvalidStateException catch (_) {
       _showSnackBar(context, 'Data yang Anda masukkan tidak valid.');
