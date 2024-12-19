@@ -43,7 +43,48 @@ class _ProductListScreenState extends State<ProductListScreen> {
     }
   }
 
-  Future<void> onLogoutHandler(VoidCallback callback) async {
+  Future<void> onRefreshHandler() async {
+    final viewModel = context.read<ProductViewModel>();
+    await viewModel.getAllProducts();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        title: const Text('Product List'),
+      ),
+      drawer: const _ProductListDrawer(),
+      body: RefreshIndicator(
+        onRefresh: onRefreshHandler,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Selamat datang, $username',
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Expanded(
+                child: _ProductList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductListDrawer extends StatelessWidget {
+  const _ProductListDrawer();
+
+  Future<void> onLogoutHandler(BuildContext context, VoidCallback callback) async {
     final viewModel = context.read<UserViewModel>();
     final logoutResult = await viewModel.logout();
     
@@ -52,12 +93,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     }
   }
 
-  Future<void> onRefreshHandler() async {
-    final viewModel = context.read<ProductViewModel>();
-    await viewModel.getAllProducts();
-  }
-
-  Future<void> onAddNewProductButtonPressedHandler(VoidCallback callback) async {
+  Future<void> onAddNewProductButtonPressedHandler(BuildContext context, VoidCallback callback) async {
     final viewModel = context.read<ProductViewModel>();
     final result = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) {
       return const ProductFormScreen();
@@ -71,14 +107,34 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.amber,
-        title: const Text('Product List'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              onLogoutHandler(() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              image: DecorationImage(
+                image: AssetImage('assets/images/logo_mercubuana.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Text(''),
+          ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Tambah Produk'),
+            onTap: () async {
+              onAddNewProductButtonPressedHandler(context, () {
+                _showSnackBar(context, 'Produk berhasil ditambahkan.');
+              });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: () async {
+              onLogoutHandler(context, () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) {
                     return const UserAuthScreen();
@@ -86,44 +142,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 );
               });
             },
-            icon: const Icon(Icons.logout),
           ),
         ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: onRefreshHandler,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Selamat datang, $username!',
-                    style: const TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      onAddNewProductButtonPressedHandler(() {
-                        _showSnackBar(context, 'Produk berhasil ditambahkan.');
-                      });
-                    },
-                    child: const Text('Tambah Produk'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const Expanded(
-                child: _ProductList(),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
