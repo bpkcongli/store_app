@@ -14,6 +14,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
 
   @override
   void initState() {
@@ -21,6 +22,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     _usernameController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _confirmPasswordController = TextEditingController();
   }
 
   @override
@@ -42,6 +44,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
   }
 
   Future<void> onPressedRegisterButtonHandler(VoidCallback callback) async {
@@ -49,8 +52,9 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     final username = _usernameController.text;
     final email = _emailController.text;
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
-    final registrationResult = await viewModel.registration(username, email, password);
+    final registrationResult = await viewModel.registration(username, email, password, confirmPassword);
     if (registrationResult) {
       callback();
     }
@@ -95,6 +99,13 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                 obscureText: true,
                 decoration: const InputDecoration(
                   hintText: 'Masukkan password',
+                ),
+              ),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: 'Konfirmasi password',
                 ),
               ),
               const SizedBox(height: 24),
