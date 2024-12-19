@@ -2,24 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './product_form_screen.dart';
 import '../user/user_auth_screen.dart';
+import '../../common/user_info.dart';
 import '../../viewmodels/product_view_model.dart';
 import '../../viewmodels/user_view_model.dart';
 
 class ProductListScreen extends StatefulWidget {
-  final String username;
-
-  const ProductListScreen({ super.key, required this.username });
+  const ProductListScreen({super.key});
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
+  String username = 'user';
+
   @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
+    Future.microtask(() async {
+      username = (await UserInfo().getUsername())!;
+
       if (mounted) {
         final viewModel = context.read<ProductViewModel>();
         viewModel.getAllProducts();
@@ -98,7 +101,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Selamat datang, ${widget.username}!',
+                    'Selamat datang, $username!',
                     style: const TextStyle(
                       fontSize: 16,
                     ),

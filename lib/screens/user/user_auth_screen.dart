@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './user_registration_screen.dart';
 import '../product/product_list_screen.dart';
+import '../../common/user_info.dart';
 import '../../viewmodels/user_view_model.dart';
 
 class UserAuthScreen extends StatefulWidget {
@@ -96,7 +97,8 @@ class _UserAuthScreenState extends State<UserAuthScreen> {
                     onPressedLoginButtonHandler(() {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) {
-                          return ProductListScreen(username: _usernameController.text);
+                          UserInfo().setUsername(_usernameController.text);
+                          return const ProductListScreen();
                         }),
                       );
                     });
