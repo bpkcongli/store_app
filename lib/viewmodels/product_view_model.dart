@@ -94,15 +94,15 @@ class ProductViewModel extends ChangeNotifier {
 
   void _checkNewProductValidity(String code, String name, double price) {
     if (code.isEmpty) {
-      throw ProductInvalidStateException('Product code is empty.');
+      throw ProductInvalidStateException('Kode produk tidak boleh kosong.');
     }
 
     if (name.isEmpty) {
-      throw ProductInvalidStateException('Product description is empty.');
+      throw ProductInvalidStateException('Nama produk tidak boleh kosong.');
     }
 
     if (price <= 0) {
-      throw ProductInvalidStateException('Product price less than or equal to 0.');
+      throw ProductInvalidStateException('Harga produk tidak boleh kurang atau sama dengan 0.');
     }
   }
 

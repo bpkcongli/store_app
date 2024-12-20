@@ -189,34 +189,36 @@ class _ProductList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final product = viewModel.products[index];
 
-                  return ListTile(
-                    title: Text(product.name),
-                    subtitle: Text('$currency ${product.price.truncate().toString()}'),
-                    trailing: PopupMenuButton<String>(
-                      itemBuilder: (context) {
-                        return {'Edit', 'Delete'}.map((option) {
-                          return PopupMenuItem<String>(
-                            value: option,
-                            child: Text(option),
-                          );
-                        }).toList();
-                      },
-                      onSelected: (String option) async {
-                        switch (option) {
-                          case 'Edit': {
-                            onEditProductOptionSelectedHandler(product.id, context, () {
-                              _showSnackBar(context, 'Produk berhasil diedit.');
-                            });
+                  return Card(
+                    child: ListTile(
+                      title: Text(product.name),
+                      subtitle: Text('$currency ${product.price.truncate().toString()}'),
+                      trailing: PopupMenuButton<String>(
+                        itemBuilder: (context) {
+                          return {'Edit', 'Delete'}.map((option) {
+                            return PopupMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            );
+                          }).toList();
+                        },
+                        onSelected: (String option) async {
+                          switch (option) {
+                            case 'Edit': {
+                              onEditProductOptionSelectedHandler(product.id, context, () {
+                                _showSnackBar(context, 'Produk berhasil diedit.');
+                              });
+                            }
+                            case 'Delete': {
+                              onDeleteProductOptionSelectedHandler(product.id, context, () {
+                                _showSnackBar(context, 'Produk berhasil dihapus.');
+                              });
+                            }
                           }
-                          case 'Delete': {
-                            onDeleteProductOptionSelectedHandler(product.id, context, () {
-                              _showSnackBar(context, 'Produk berhasil dihapus.');
-                            });
-                          }
-                        }
-                      },
+                        },
+                      ),
+                      onTap: () {},
                     ),
-                    onTap: () {},
                   );
                 },
               );
